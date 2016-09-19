@@ -1,0 +1,76 @@
+Task:
+    Often sensors only provide partial observations of the environment. In this
+    challenge you are provided input data from a simulated 2d scanning laser
+    and the goal is to develop an algorithm that estimates the full state of
+    the world.
+
+    The simulated 2d laser scanner samples uniformly over a 360 degree
+    arc. For each full 360 degree scan of the laser the scene is divided
+    into a 2d grid of 100 x 100 pixels and visibility is raytraced for
+    each pixel, creating an occupancy map that represents known occupied,
+    empty, and unknown pixels.
+
+    Your goal is for each pixel in the 100x100 grid estimate if the pixel
+    is occupied or empty based on the previous 20 consecutive laser scan
+    measurements.
+
+    Samples of an occupancy and ground truth image are provided:
+    - sample_occupancy.png
+    -- pixel value == 0: known unknown
+    -- pixel value == 127: known empty
+    -- pixel value == 255: known occupied
+    - sample_ground_truth.png
+    -- pixel value == 0: empty space
+    -- pixel value == 255: occupied by object
+
+    You are provided a dataset here:
+    - https://drive.google.com/file/d/0B7Vu8L7t-OUpc2l2eC0yU2lCaUk/view?usp=sharing
+
+    The dataset contains a sequence of raytraced laser scans and
+    corresponding ground truth images.
+
+    Data is stored with the following hdf5 format:
+    - dataset: "occupancy"
+    -- shape: (100, 100, n_frames)
+    -- data_type: uint8
+    - dataset: "ground_truth"
+    -- shape: (100, 100, n_frames)
+    -- data_type: uint8
+
+    We used h5py to create the hdf5 store with gzip compression.
+    See: http://docs.h5py.org/en/latest/high/dataset.html
+
+Deliverables
+    Provide a README
+    - Instructions for set up and running
+    - Describe the approach you took and why you chose it
+    - Advantages and disadvantages
+    - Relevant materials, if used (books, papers, blogs, ...)
+    - Breakdown of time spent
+    - Future directions you would take if you had more time
+    -- What would you do with a few days? with a few weeks?
+    -- What if your algorithm needed to run in real time (20hz)?
+    -- Our simulated sensor data is very clean, how would you deal with
+       noisy real world sensor data.
+    - Can your approach infer future states and if so how effective
+      is it?
+
+    You should provide a testing script:
+    - Input arguments
+        - path to hdf5 store containing raytraced laser scan
+          images and ground truth images.
+        - index of the frame to estimated. You will use the preceding 20 frames
+          to make this estimate.
+    - Outputs:
+        - Saves an the estimate output image.
+        - Saves the error between the your estimate and the ground truth
+        - Any other outputs you find interesting or useful
+    - The error metric used will be the sum of squared pixel distances between
+      your output and the ground truth image.
+
+    In order to test your solution we will use a separately generated dataset
+    and run your testing script on various sequences.
+
+Notes
+    - We only accept solutions using open source tools (no matlab)
+    - If you need more data we will gladly generate more for you.
