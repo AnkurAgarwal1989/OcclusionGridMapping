@@ -140,3 +140,6 @@ $RECYCLE.BIN/
 /*.png
 *.png
 /*.h5
+/OccGrid/*.sln
+/OccGrid/.vs
+/OccGrid/OccGrid/*.pyproj
