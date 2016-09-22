@@ -143,3 +143,4 @@ $RECYCLE.BIN/
 /OccGrid/*.sln
 /OccGrid/.vs
 /OccGrid/OccGrid/*.pyproj
+/*.spyderworkspace
