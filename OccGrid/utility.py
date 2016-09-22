@@ -21,6 +21,6 @@ def compareWithGroundTruth(state_GT, state_est, filename = "diff_image.png"):
 ##Function to display the grid map as image
 #params: single frame,a 2d image
 def saveImagePNG(img, fileName = "temp.png"):
-    if (img is not None):
+    if img is not None:
       cv2.imwrite(fileName, img)
 

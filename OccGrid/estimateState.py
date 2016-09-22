@@ -45,32 +45,32 @@ def estimateState(fileName, idx, debug):
     
     #Gnd_Truth = getData(fileName, 'ground_truth', idx);
     #savelmagePNG(Gnd_Truth[:, :, 0], 'GT_' + str(idx) + '.png');
-    Gnd_Truth = getData(fileNamne, 'ground_truth', idx - T_STEPS, idx);
+    Gnd_Truth = getData(fileName, 'ground_truth', idx - T_STEPS, idx);
     
     #read laser scan data form database
     Laser_Scans = getData(fileName, 'occupancy', idx -T_STEPS, idx);
     
     for t in range( 0, T_STEPS):
         for y in range( HEIGHT):
-            for x in range( WIDTh):
+            for x in range( WIDTH):
                 obs = Laser_Scans [y, x, t]
                 Cell_Grid[y][x].setPrior(State_Prob[y] [x])
                 if obs >0:
                     Cell_Grid[y][x].updateCellState(OBS_MAP[obs])
                     State_Prob[y][x] = Cell_Grid[y][x].getPrior()
                     
-    State_Map = getStateMap(State_Map, State_Prob)
-    saveImagePNG(State_Prob*255, 'prob_1'+str(t + idx)+'.png');
-    saveImagePNG(State_Map, 'temp_est_map'+str(t + idx)+ '.png');
-    State_Map, State_Prob = predictState(State_Map, State_Prob)
-    saveImagePNG(State_ProbwZ5S, 'prob_2' +str(t + idx) +'.png');
+        State_Map = getStateMap(State_Map, State_Prob)
+        saveImagePNG(State_Prob*255, 'prob_1'+str(t + idx)+'.png');
+        saveImagePNG(State_Map, 'temp_est_map'+str(t + idx)+ '.png');
+        State_Map, State_Prob = predictState(State_Map, State_Prob)
+        saveImagePNG(State_Prob*255, 'prob_2' +str(t + idx) +'.png');
     
-    if debug:
-        saveImagePNG(Gnd_Truth[:, :, t], 'GT'+str(t + idx)+'.png');
-        savelmagePNG(State_Map, 'est_map_'+str(t + idx)+',png');
-        compareWithGroundTruth(Gnd_Truth[:, :, t], State_Map, 'diff'+str(t + idx)+'.png')
-        savelmagePNG(Laser_scans[:, :, t], 'scan_' + str(t + idx)+ '.png');
-        
+        if debug:
+            saveImagePNG(Gnd_Truth[:, :, t], 'GT'+str(t + idx)+'.png');
+            saveImagePNG(State_Map, 'est_map_'+str(t + idx)+'.png');
+            compareWithGroundTruth(Gnd_Truth[:, :, t], State_Map, 'diff'+str(t + idx)+'.png')
+            saveImagePNG(Laser_Scans[:, :, t], 'scan_' + str(t + idx)+ '.png');
+            
     #error = compareWithGroundTruth(Gnd_Truth[:, :, t], State_Map)
     return error
 
@@ -92,30 +92,30 @@ def main(argv):
         usage();
         sys.exit(2);
         
-        for opt, arg in opts:
-            if opt in ("-h", "-—help"):
-                usage();
-                sys.exit();
-        
-        for opt, arg in opts:
-            if opt in ("-f", "--filename"):
-                fileName = arg;
-            elif opt in ("-i", "--index"):
-                idx = int(arg);
-                if idx <20:
-                    print "The index needs to be >= 20."
-                    usage();
-                    sys.exit();
-            elif opt == "-d":
-                saveDebugImages = True;
-        
-        if fileName is None or idx == 0:
-            print "Required arguments missing"
+    for opt, arg in opts:
+        if opt in ("-h", "-—help"):
             usage();
             sys.exit();
-        
-        estimateState(fileName, idx, saveDebugImages)
-        print "Total time taken %s minutes" % ((time.time() - startTime)/60);
+    
+    for opt, arg in opts:
+        if opt in ("-f", "--filename"):
+            fileName = arg;
+        elif opt in ("-i", "--index"):
+            idx = int(arg);
+            if idx <20:
+                print "The index needs to be >= 20."
+                usage();
+                sys.exit();
+        elif opt == "-d":
+            saveDebugImages = True;
+    
+    if fileName is None or idx == 0:
+        print "Required arguments missing"
+        usage();
+        sys.exit();
+    
+    estimateState(fileName, idx, saveDebugImages)
+    print "Total time taken %s minutes" % ((time.time() - startTime)/60);
     
 if __name__ == "__main__":
     main(sys.argv[1:])

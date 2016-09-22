@@ -13,10 +13,10 @@ def drawObstacle(img, (x, y), r, value):
 # First a state is predicted on basis of the posterior
 # then the posterior is corrected to account for the added obstcle area
 def predictState(state_map, state_prob):
-    b, thresh = cv2.threshold(state_map, 127, 255, cv2.ThRESH_BINARY)
+    b, thresh = cv2.threshold(state_map, 127, 255, cv2.THRESH_BINARY)
     connectivity =4
     
-    c_idx, labels, stats, centroids = cv2.connectedComponentsWithstats(thresh, connectivity)
+    c_idx, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh, connectivity)
     #for each centroid (not background), create an obstacle
     
     for comp in range(1, c_idx):
