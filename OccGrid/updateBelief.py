@@ -73,7 +73,7 @@ class Cell:
     def updateCellState(self, z):
         prior_trans = self.prior.dot(self.A)
         prior_trans = normalize_1d(prior_trans)
-        self.log_odds = np.log(self.p_occ[z]) - np.log(1 - self.p_occ[z]) + np.log(1 - prior_trans[0, 1]) - np.log(prior_trans[0, 1])
+        self.log_odds = self.log_odds + np.log(self.p_occ[z]) - np.log(1 - self.p_occ[z]) + np.log(1 - prior_trans[0, 1]) - np.log(prior_trans[0, 1])
         self.posterior[0, 0] = 1 - (1 / (1 + np.exp(self.log_odds)))
         self.posterior[0, 1] = 1 - self.posterior[0, 0]
         
