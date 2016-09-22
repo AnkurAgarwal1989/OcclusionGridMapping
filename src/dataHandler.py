@@ -1,12 +1,9 @@
 import h5py
-import numpy as np
-import matplotlib.pyplot as plt
-from PIL import Image
 
-#Function reads one single image from the data
-
+#Function to read frames from H5PY datafile
 #end defaults to 0. If 0, only 1 frame @ begin is read
-#if both startIdx and endIdx are provIdxed and endIdx > startIdx, data includes startIdx, excludes endIdx: (startIdx, endIdx]
+#if both startIdx and endIdx are provIdxed and endIdx > startIdx
+#data includes startIdx, excludes endIdx: (startIdx, endIdx]
 
 def getData(filename, dataset, startIdx, endIdx=0):
     if (endIdx == 0):
