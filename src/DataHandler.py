@@ -34,18 +34,3 @@ def getData(filename, dataset, startIdx, endIdx=0):
     data = file[dataset][:, :, startIdx : endIdx];
     file.close();
     return data#.transpose(2, 0, 1)
-    
-
-##Function to display the grid map as image
-#params: single frame,a 2d image
-#       bool flag to save a image as temp.png
-def saveImage(img, saveImg = False, fileName = None):
-    if (img is not None):
-        #plt.imshow(img, cmap='Greys_r')
-        if (saveImg):
-            im = Image.fromarray(img)
-            if (fileName is not None):
-                im.save(fileName)
-            else:
-                im.save('temp.png')
-
