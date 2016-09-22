@@ -7,7 +7,7 @@ from updateBelief import Observation
 from updateBelief import State
 
 from predictState import *
-from dataHandler import *
+from H5PYHandler import *
 from utility import *
 
 OBS_MAP = {0: Observation.NO_OBS,
@@ -45,10 +45,10 @@ def estimateState(fileName, idx, debug):
     
     #Gnd_Truth = getData(fileName, 'ground_truth', idx);
     #savelmagePNG(Gnd_Truth[:, :, 0], 'GT_' + str(idx) + '.png');
-    Gnd_Truth = getData(fileName, 'ground_truth', idx - T_STEPS, idx);
+    Gnd_Truth = getData(fileName, 'ground_truth', idx - T_STEPS, T_STEPS);
     
     #read laser scan data form database
-    Laser_Scans = getData(fileName, 'occupancy', idx -T_STEPS, idx);
+    Laser_Scans = getData(fileName, 'occupancy', idx - T_STEPS, T_STEPS);
     
     for t in range( 0, T_STEPS):
         for y in range( HEIGHT):
