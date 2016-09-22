@@ -37,9 +37,9 @@ class Cell:
     
     #Dictionary of Inverse Sensor Model
     p_occ = {}
-    p_occ['hit'] = 0.999
-    p_occ['miss'] = 0.001
-    p_occ['nobs']  = 0.4
+    p_occ[Observation.HIT] = 0.999
+    p_occ[Observation.MISS] = 0.001
+    p_occ[Observation.NO_OBS]  = 0.5
     
     #variable to hold log_odds
     log_odds = 0;
@@ -51,30 +51,43 @@ class Cell:
         self.prior[0,1] = 0.7   #empty
         
         #Dynamic Environment
-        A[0, 0] = 0.3
-        A[0, 1] = 0.7
-        A[1, 0] = 0.4
-        A[1, 1] = 0.6
+        '''self.A[0, 0] = 0.3
+        self.A[0, 1] = 0.7
+        self.A[1, 0] = 0.3
+        self.A[1, 1] = 0.7'''
+        
+        self.A[0, 0] = 1
+        self.A[0, 1] = 0
+        self.A[1, 0] = 0
+        self.A[1, 1] = 1
+    #set cell prior to occlusion probability after state map correction
+    def setPrior(self, p_occ):
+        self.prior[0, 0] = p_occ
+        self.prior[0, 1] = 1 - p_occ
+        self.log_odds = np.log(p_occ) - np.log(1 - p_occ)
+        
+    def getPrior(self):
+        return self.prior[0, 0]
  
     #function to update state probabilities (prior) of the cell with observation z of laser scan.
-    def updateState(self, z):
+    def updateCellState(self, z):
         prior_trans = self.prior.dot(self.A)
         prior_trans = normalize_1d(prior_trans)
-        self.log_odd = self.log_odd + np.log(self.p_occ[z]) - np.log(1 - self.p_occ[z]) + np.log(1 - prior_trans[0, 1]) - np.log(prior_trans[0, 1])
-        self.posterior[0, 0] = 1 - (1 / (1 + np.exp(log_odd)))
+        self.log_odds = np.log(self.p_occ[z]) - np.log(1 - self.p_occ[z]) + np.log(1 - prior_trans[0, 1]) - np.log(prior_trans[0, 1])
+        self.posterior[0, 0] = 1 - (1 / (1 + np.exp(self.log_odds)))
         self.posterior[0, 1] = 1 - self.posterior[0, 0]
         
         #some counting maybe???
         
-        prior = posterior.copy()
+        self.prior = self.posterior.copy()
     
     def printStateMatrix(self):
         print self.Q_curr;    
     
-    def getState(self):
+    '''def getState(self):
         if (self.prior[0, 0] > 0.5):
             return State.OCC
-        return State.EMPTY
+        return State.EMPTY'''
         
     def __repr__(self):
         return self.getState()

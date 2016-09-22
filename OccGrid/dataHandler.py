@@ -8,6 +8,8 @@ import h5py
 def getData(filename, dataset, startIdx, endIdx=0):
     if (endIdx == 0):
         endIdx = startIdx + 1; # since we will be returning only 1 frame
+    else:
+        endIdx += 1
     
     if (startIdx > endIdx or startIdx < 0 or endIdx < 0): # starting has to be before ending
         print "Unable to read file. Ensure Starting index is lesser than Ending index. Both numbers should be positive integers"

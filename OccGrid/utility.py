@@ -1,6 +1,5 @@
 #set of utitlity functions to print/ save output images and errors
-
-from numpy import linalg as LA
+import numpy as np
 import cv2
 
 #function to calculate and save error metric and difference between ground truth and estimated states
@@ -8,13 +7,13 @@ import cv2
 #Pixels map:
 # Ground truth == estimate: 0
 # Ground truth =/= estimate: 255
-def compareWithGroundTruth(state_GT, state_est):
+def compareWithGroundTruth(state_GT, state_est, filename = "diff_image.png"):
   diff_image = np.zeros_like(state_GT);
   diff_image[state_GT == state_est] = 0
   diff_image[state_GT != state_est] = 255
-  saveImagePNG(diff_image, "diff_image.png");
+  saveImagePNG(diff_image, filename);
   
-  error = LA.norm(diff_image)
+  error = np.linalg.norm(diff_image)
   error = error ** 2;
   return error
 
@@ -23,5 +22,5 @@ def compareWithGroundTruth(state_GT, state_est):
 #params: single frame,a 2d image
 def saveImagePNG(img, fileName = "temp.png"):
     if (img is not None):
-      cv2.imwrite(img, fileName)
+      cv2.imwrite(fileName, img)
 
