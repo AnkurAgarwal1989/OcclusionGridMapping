@@ -67,13 +67,13 @@ def estimateState(fileName, idx, debug):
         #print State_Prob
                     
         State_Map = getStateMap(State_Map, State_Prob)
-        saveImagePNG(State_Prob*255, str(t + idx)+'_prob_1.png');
-        saveImagePNG(State_Map, str(t + idx)+ 'local_map.png');
+        #saveImagePNG(State_Prob*255, str(t + idx)+'_prob_1.png');
+        #saveImagePNG(State_Map, str(t + idx)+ 'local_map.png');
         
-        saveImagePNG(Global_State_Map, str(t + idx)+'before_global_map.png');
+        #saveImagePNG(Global_State_Map, str(t + idx)+'before_global_map.png');
         Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
-        saveImagePNG(State_Prob*255, str(t + idx) +'_prob_2.png');
-        saveImagePNG(Global_State_Map, str(t + idx)+'after_global_map.png');
+        #saveImagePNG(State_Prob*255, str(t + idx) +'_prob_2.png');
+        #saveImagePNG(Global_State_Map, str(t + idx)+'after_global_map.png');
     
         if debug:
             saveImagePNG(Gnd_Truth[:, :, t], str(t + idx)+'_GT.png');
@@ -81,7 +81,8 @@ def estimateState(fileName, idx, debug):
             compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, str(t + idx) + '_diff.png')
             saveImagePNG(Laser_Scans[:, :, t], str(t + idx)+ '_scan.png');
             
-    #error = compareWithGroundTruth(Gnd_Truth[:, :, t], State_Map)
+    error = compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map)
+    print error
     return error
 
 #Entry function

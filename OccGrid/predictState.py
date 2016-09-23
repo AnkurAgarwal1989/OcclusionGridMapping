@@ -62,7 +62,7 @@ def predictState2(global_map, local_map, state_prob):
 def getNewCenter(l_x, l_y, g_x, g_y):
     newX = 0
     newY = 0
-    d = - ((np.sqrt((l_x-g_x)**2 + (l_y-g_y)**2)) - 6)
+    d = - ((np.sqrt((l_x-g_x)**2 + (l_y-g_y)**2)) - OBSTACLE_RADIUS)
     if (g_x == l_x and g_y == l_y):
         return (g_x, g_y)
     if (g_x == l_x):
@@ -88,33 +88,30 @@ def getNewCenter(l_x, l_y, g_x, g_y):
         theta = math.atan( (l_y - g_y) / (l_x - g_x) )
         newX = g_x - (d * math.cos(theta))
         newY = g_y - (d * math.sin(theta))
-    print l_x, l_y, g_x, g_y, newX, newY
+    #print l_x, l_y, g_x, g_y, newX, newY
     return (newX, newY)
 
 def predictState(global_map, local_map, state_prob):
     c_l, labels_l, stats_l, centroids_l = cv2.connectedComponentsWithStats(local_map, 4)
     c_g, labels_g, stats_g, centroids_g = cv2.connectedComponentsWithStats(global_map, 4)
-    print "Predicting"
+    
     #clean global map
-    print "centroids"
-    print centroids_l
-    print centroids_g
-    global_map = np.zeros_like(global_map)    
+    global_map = np.zeros_like(global_map) 
+    state_prob = np.full_like(state_prob, 0.3) 
     
     #get distance matrix between all centroids
     dist = cdist(centroids_l, centroids_g, 'sqeuclidean')
-    #find shortes distance between the local and global obstacle positions
-    print c_l    
+    #find shortes distance between the local and global obstacle positions 
     for p in range(1, c_l):      
         if stats_l[p][4] > 2: 
-            print 'c_l_cen' , centroids_l[p][0], centroids_l[p][1]
-            print 'min_dist', min(dist[p])
+            #print 'c_l_cen' , centroids_l[p][0], centroids_l[p][1]
+            #print 'min_dist', min(dist[p])
             best_g = np.argmin(dist[p])
-            print 'best_fit', best_g
+            #print 'best_fit', best_g
             if min(dist[p]) < 15: # if newest center is lesser than 9 pixels 
                 # adjust center to 6 pixels in direction
                 best_g = np.argmin(dist[p])
-                print "getting new center", 
+                #print "getting new center", 
                 l_x = stats_l[p][0] + (stats_l[p][2]/2)
                 l_y = stats_l[p][1] + (stats_l[p][3]/2)
                 (cx, cy) = getNewCenter(l_x, l_y, centroids_g[best_g][0], centroids_g[best_g][1])
@@ -126,7 +123,10 @@ def predictState(global_map, local_map, state_prob):
                 (cx, cy) = (centroids_l[p][0], centroids_l[p][1])
                 
             global_map = drawObstacle(global_map, (cx, cy), OBSTACLE_RADIUS, 255)
-            #state_prob = drawObstacle(state_prob, (cx, cy), OBSTACLE_RADIUS, 0.7)
+            state_prob = drawObstacle(state_prob, (cx, cy), OBSTACLE_RADIUS, 0.7)
+        else:
+            global_map[labels_l == p] = 255
+            state_prob[labels_l == p] = 0.7
     
     #there are obstacles in global map that also need to be added
     '''for p in range(1, c_g):
