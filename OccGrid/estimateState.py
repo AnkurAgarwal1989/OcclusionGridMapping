@@ -45,16 +45,16 @@ def estimateState(fileName, idx, debug):
     
     #Gnd_Truth = getData(fileName, 'ground_truth', idx);
     #savelmagePNG(Gnd_Truth[:, :, 0], 'GT_' + str(idx) + '.png');
-    Gnd_Truth = getData(fileName, 'ground_truth', idx - T_STEPS, T_STEPS);
+    Gnd_Truth = getData(fileName, 'ground_truth', idx - T_STEPS + 1, T_STEPS);
     
     #read laser scan data form database
-    Laser_Scans = getData(fileName, 'occupancy', idx - T_STEPS, T_STEPS);
+    Laser_Scans = getData(fileName, 'occupancy', idx - T_STEPS + 1, T_STEPS);
     
     for t in range( 0, T_STEPS):
         for y in range( HEIGHT):
             for x in range( WIDTH):
                 obs = Laser_Scans [y, x, t]
-                Cell_Grid[y][x].setPrior(State_Prob[y] [x])
+                Cell_Grid[y][x].setPrior(State_Prob[y][x])
                 if obs >0:
                     Cell_Grid[y][x].updateCellState(OBS_MAP[obs])
                     State_Prob[y][x] = Cell_Grid[y][x].getPrior()

@@ -31,7 +31,7 @@ def predictState(state_map, state_prob):
             #cx = centroid[0]
             #cy = centroid[1]
             #Pick the probability of the centroid. This becomes prior for all pixels belonging to the obstacle now
-            obs_prob = state_prob[centroid[1]][centroid [0]] #indexed [y][x]
+            obs_prob = state_prob[centroid[1]][centroid[0]] #indexed [y][x]
             
             state_map = drawObstacle(state_map, (cx, cy), OBSTACLE_RADIUS, 255)
             state_prob = drawObstacle(state_prob, (cx, cy), OBSTACLE_RADIUS, obs_prob)
