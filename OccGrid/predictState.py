@@ -44,15 +44,15 @@ def predictState(state_map, state_prob):
                        state_prob[np.ceil(centroid[1]) ][np.floor(centroid[0]) ],
                        state_prob[np.floor(centroid[1]) ][np.ceil(centroid[0]) ],
                        state_prob[np.floor(centroid[1]) ][np.floor(centroid[0]) ]);#indexed [y][x]'''
-                     
-        obs_prob = np.amax(state_prob[stat[2]:stat[2] + stat[4], stat[1]:stat[1] + stat[3]])
-        
-        if obs_prob < 0.5:
-            print state_prob[stat[1]:stat[1] + stat[3], stat[2]:stat[2] + stat[4]]
-            print str(obs_prob) + " here"
-        state_map = drawObstacle(state_map, (cx, cy), OBSTACLE_RADIUS, 255)
-        state_prob_new = drawObstacle(state_prob_new, (cx, cy), OBSTACLE_RADIUS, 0.8)
-        
-        saveImagePNG(state_prob*255, 'prob_after_circle.png');
+        if stat[4] > 2:           
+            obs_prob = np.amax(state_prob[stat[2]:stat[2] + stat[4], stat[1]:stat[1] + stat[3]])
+            
+            '''if obs_prob < 0.5:
+                print state_prob[stat[1]:stat[1] + stat[3], stat[2]:stat[2] + stat[4]]
+                print str(obs_prob) + " here"'''
+            state_map = drawObstacle(state_map, (cx, cy), OBSTACLE_RADIUS, 255)
+            state_prob_new = drawObstacle(state_prob_new, (cx, cy), OBSTACLE_RADIUS, obs_prob)
+            
+            saveImagePNG(state_prob*255, 'prob_after_circle.png');
             
     return (state_map, state_prob_new)
