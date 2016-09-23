@@ -39,7 +39,7 @@ class Cell:
     p_occ = {}
     p_occ[Observation.HIT] = 0.9999
     p_occ[Observation.MISS] = 0.0001
-    #p_occ[Observation.NO_OBS]  = 0.3
+    p_occ[Observation.NO_OBS]  = 0.5
     
     #variable to hold log_odds
     log_odds = 0;
