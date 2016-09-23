@@ -38,7 +38,7 @@ def getStateMap(state_map, state_prob):
 def estimateState(fileName, idx, debug):
     HEIGHT = 100
     WIDTH = 100
-    T_STEPS = 20
+    T_STEPS = 10
     Global_State_Map = np.full((HEIGHT, WIDTH), 255, dtype = np.uint8);
     State_Prob = np.full((HEIGHT, WIDTH), 0.3); #All cells are assumed empty initially
     #State_Map = getStateMap(State_Map, State_Prob)
@@ -56,6 +56,7 @@ def estimateState(fileName, idx, debug):
     
     for t in range( 0, T_STEPS):
         State_Map = np.zeros((HEIGHT, WIDTH), dtype = np.uint8);
+        State_Prob = np.full((HEIGHT, WIDTH), 0.3);
         for y in range( HEIGHT):
             for x in range( WIDTH):
                 obs = Laser_Scans[y, x, t]
@@ -66,12 +67,12 @@ def estimateState(fileName, idx, debug):
         #print State_Prob
                     
         State_Map = getStateMap(State_Map, State_Prob)
-        #saveImagePNG(State_Prob*255, 'prob_1_'+str(t + idx)+'.png');
+        saveImagePNG(State_Prob*255, str(t + idx)+'_prob_1.png');
         saveImagePNG(State_Map, str(t + idx)+ 'local_map.png');
         
         saveImagePNG(Global_State_Map, str(t + idx)+'before_global_map.png');
         Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
-        #saveImagePNG(State_Prob*255, 'prob_2_' +str(t + idx) +'.png');
+        saveImagePNG(State_Prob*255, str(t + idx) +'_prob_2.png');
         saveImagePNG(Global_State_Map, str(t + idx)+'after_global_map.png');
     
         if debug:
