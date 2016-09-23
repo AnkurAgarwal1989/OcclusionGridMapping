@@ -39,9 +39,9 @@ def estimateState(fileName, idx, debug):
     HEIGHT = 100
     WIDTH = 100
     T_STEPS = 20
-    State_Map = np.zeros((HEIGHT, WIDTH), dtype = np.uint8);
+    Global_State_Map = np.full((HEIGHT, WIDTH), 0, dtype = np.uint8);
     State_Prob = np.full((HEIGHT, WIDTH), 0.3); #All cells are assumed empty initially
-    State_Map = getStateMap(State_Map, State_Prob)
+    #State_Map = getStateMap(State_Map, State_Prob)
     
     Cell_Grid = [[Cell() for w in range(WIDTH)] for h in range(HEIGHT)]
     
@@ -55,27 +55,29 @@ def estimateState(fileName, idx, debug):
     Laser_Scans = getData(fileName, 'occupancy', idx - T_STEPS + 1, T_STEPS);
     
     for t in range( 0, T_STEPS):
+        State_Map = np.zeros((HEIGHT, WIDTH), dtype = np.uint8);
         for y in range( HEIGHT):
             for x in range( WIDTH):
                 obs = Laser_Scans[y, x, t]
                 Cell_Grid[y][x].setPrior(State_Prob[y][x])
-                if obs > -1:
+                if obs > 0:
                     Cell_Grid[y][x].updateCellState(OBS_MAP[obs])
                     State_Prob[y][x] = Cell_Grid[y][x].getPrior()
         #print State_Prob
                     
         State_Map = getStateMap(State_Map, State_Prob)
-        saveImagePNG(State_Prob*255, 'prob_1'+str(t + idx)+'.png');
-        saveImagePNG(State_Map, 'temp_est_map'+str(t + idx)+ '.png');
+        saveImagePNG(State_Prob*255, 'prob_1_'+str(t + idx)+'.png');
+        saveImagePNG(State_Map, 'local_map_'+str(t + idx)+ '_.png');
         
-        State_Map, State_Prob = predictState(State_Map, State_Prob)
-        saveImagePNG(State_Prob*255, 'prob_2' +str(t + idx) +'.png');
+        Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
+        saveImagePNG(State_Prob*255, 'prob_2_' +str(t + idx) +'.png');
+        saveImagePNG(Global_State_Map, 'global_map_'+str(t + idx)+ '_.png');
     
         if debug:
-            saveImagePNG(Gnd_Truth[:, :, t], 'GT'+str(t + idx)+'.png');
-            saveImagePNG(State_Map, 'est_map_'+str(t + idx)+'.png');
-            compareWithGroundTruth(Gnd_Truth[:, :, t], State_Map, 'diff'+str(t + idx)+'.png')
-            saveImagePNG(Laser_Scans[:, :, t], 'scan_' + str(t + idx)+ '.png');
+            saveImagePNG(Gnd_Truth[:, :, t], 'GT_'+str(t + idx)+'.png');
+            #saveImagePNG(State_Map, 'est_map_'+str(t + idx)+'.png');
+            compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, 'diff'+str(t + idx)+'.png')
+            #saveImagePNG(Laser_Scans[:, :, t], 'scan_' + str(t + idx)+ '.png');
             
     #error = compareWithGroundTruth(Gnd_Truth[:, :, t], State_Map)
     return error

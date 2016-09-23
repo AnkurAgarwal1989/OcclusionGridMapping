@@ -39,7 +39,7 @@ class Cell:
     p_occ = {}
     p_occ[Observation.HIT] = 0.9999
     p_occ[Observation.MISS] = 0.0001
-    p_occ[Observation.NO_OBS]  = 0.2
+    #p_occ[Observation.NO_OBS]  = 0.3
     
     #variable to hold log_odds
     log_odds = 0;
@@ -51,15 +51,15 @@ class Cell:
         self.prior[0,1] = 0.7   #empty
         
         #Dynamic Environment
-        '''self.A[0, 0] = 0.7
+        self.A[0, 0] = 0.7
         self.A[0, 1] = 0.3
         self.A[1, 0] = 0.3
-        self.A[1, 1] = 0.7'''
+        self.A[1, 1] = 0.7
         
-        self.A[0, 0] = 1
+        '''self.A[0, 0] = 1
         self.A[0, 1] = 0
         self.A[1, 0] = 0
-        self.A[1, 1] = 1
+        self.A[1, 1] = 1'''
     #set cell prior to occlusion probability after state map correction
     def setPrior(self, p_occ):
         self.prior[0, 0] = p_occ

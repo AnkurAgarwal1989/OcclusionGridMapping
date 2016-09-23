@@ -13,46 +13,44 @@ def drawObstacle(img, (x, y), r, value):
 # function to add obstcles to the global state
 # First a state is predicted on basis of the posterior
 # then the posterior is corrected to account for the added obstcle area
-def predictState(state_map, state_prob):
+def predictState(global_map, local_map, state_prob):
     CONN = 8
-    c_idx, labels, stats, centroids = cv2.connectedComponentsWithStats(state_map, CONN)
-    
-    #cleanup   
-    #saveImagePNG(state_prob*255, 'prob_before_circle.png');
-    state_prob_new = state_prob.copy()
-    state_prob_new[state_prob_new > 0.5] = 0.3;    
-    state_map[state_map == 1] = 0;   
-    
-    #for each centroid (not background), create an obstacle
-    
-    #print "probmax" + str(np.amax(state_prob))
-    
-    #first component is the background..ignore that
+    #for local_map...draw obstacles at every location
+    c_idx, labels, stats, centroids = cv2.connectedComponentsWithStats(local_map, CONN)
     for comp in range(1, c_idx):
         stat = stats[comp]
-        centroid = centroids[comp]
-        #do this only if area of obstacle is > 4
-    
         #Center of bounding box seems like a better point to place obstacle
-        #cx = stat[0] + (stat[2]/2)
-        #cy = stat[1] + (stat[3]/2)
-        cx = centroid[0]
-        cy = centroid[1]
-        #Pick the probability of the centroid. This becomes prior for all pixels belonging to the obstacle now
-        #print centroid        
-        '''obs_prob = max(state_prob[np.ceil(centroid[1]) ][np.ceil(centroid[0]) ], 
-                       state_prob[np.ceil(centroid[1]) ][np.floor(centroid[0]) ],
-                       state_prob[np.floor(centroid[1]) ][np.ceil(centroid[0]) ],
-                       state_prob[np.floor(centroid[1]) ][np.floor(centroid[0]) ]);#indexed [y][x]'''
+        cx = stat[0] + (stat[2]/2)
+        cy = stat[1] + (stat[3]/2)
+        #cx = centroid[0]
+        #cy = centroid[1]
+        
         if stat[4] > 2:           
-            obs_prob = np.amax(state_prob[stat[2]:stat[2] + stat[4], stat[1]:stat[1] + stat[3]])
+            local_map = drawObstacle(local_map, (cx, cy), OBSTACLE_RADIUS, 255)
+            saveImagePNG(local_map, 'local_map.png');
+    
+    #intersect local map with global map
+    temp_global = np.zeros_like(global_map)
+    #temp_global[(global_map == 255) & (local_map == 255) ] = 255
+    temp_global = global_map + local_map
+    saveImagePNG(local_map, 'mm_local_map.png');
+    saveImagePNG(global_map, 'mm_global_map.png');
+    saveImagePNG(temp_global, 'mm_add_map.png');
+    global_map = np.zeros_like(global_map)
+    
+    #redraw obstacles in global map...This is the final estimated state
+    c_idx, labels, stats, centroids = cv2.connectedComponentsWithStats(temp_global, CONN)
+    for comp in range(1, c_idx):
+        stat = stats[comp]
+        #Center of bounding box seems like a better point to place obstacle
+        cx = stat[0] + (stat[2]/2)
+        cy = stat[1] + (stat[3]/2)
+        #cx = centroid[0]
+        #cy = centroid[1]
+        
+        if stat[4] > 2:           
+            global_map = drawObstacle(global_map, (cx, cy), OBSTACLE_RADIUS, 255)
+            state_prob = drawObstacle(state_prob, (cx, cy), OBSTACLE_RADIUS, 0.7)
+            saveImagePNG(global_map, 'global_map.png');
             
-            '''if obs_prob < 0.5:
-                print state_prob[stat[1]:stat[1] + stat[3], stat[2]:stat[2] + stat[4]]
-                print str(obs_prob) + " here"'''
-            state_map = drawObstacle(state_map, (cx, cy), OBSTACLE_RADIUS, 255)
-            state_prob_new = drawObstacle(state_prob_new, (cx, cy), OBSTACLE_RADIUS, obs_prob)
-            
-            saveImagePNG(state_prob*255, 'prob_after_circle.png');
-            
-    return (state_map, state_prob_new)
+    return (global_map, state_prob)
