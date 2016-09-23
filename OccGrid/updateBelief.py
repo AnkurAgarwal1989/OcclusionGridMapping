@@ -37,9 +37,9 @@ class Cell:
     
     #Dictionary of Inverse Sensor Model
     p_occ = {}
-    p_occ[Observation.HIT] = 0.999
-    p_occ[Observation.MISS] = 0.001
-    p_occ[Observation.NO_OBS]  = 0.5
+    p_occ[Observation.HIT] = 0.9999
+    p_occ[Observation.MISS] = 0.0001
+    p_occ[Observation.NO_OBS]  = 0.2
     
     #variable to hold log_odds
     log_odds = 0;
@@ -51,8 +51,8 @@ class Cell:
         self.prior[0,1] = 0.7   #empty
         
         #Dynamic Environment
-        '''self.A[0, 0] = 0.3
-        self.A[0, 1] = 0.7
+        '''self.A[0, 0] = 0.7
+        self.A[0, 1] = 0.3
         self.A[1, 0] = 0.3
         self.A[1, 1] = 0.7'''
         
@@ -73,13 +73,22 @@ class Cell:
     def updateCellState(self, z):
         prior_trans = self.prior.dot(self.A)
         prior_trans = normalize_1d(prior_trans)
-        self.log_odds = self.log_odds + np.log(self.p_occ[z]) - np.log(1 - self.p_occ[z]) + np.log(1 - prior_trans[0, 1]) - np.log(prior_trans[0, 1])
+        self.log_odds += np.log(self.p_occ[z]) - np.log(1 - self.p_occ[z]) + np.log(1 - prior_trans[0, 0]) - np.log(prior_trans[0, 0])
         self.posterior[0, 0] = 1 - (1 / (1 + np.exp(self.log_odds)))
         self.posterior[0, 1] = 1 - self.posterior[0, 0]
         
         #some counting maybe???
         
         self.prior = self.posterior.copy()
+        '''if z == Observation.HIT:
+            self.prior[0, 0] = 0.8
+            self.prior[0, 1] = 1 - 0.8
+        
+        elif z == Observation.MISS:
+            self.prior[0, 0] = 0.2
+            self.prior[0, 1] = 1 - 0.2
+        elif z == Observation.NO_OBS:
+            print "WTF"'''
     
     def printStateMatrix(self):
         print self.Q_curr;    

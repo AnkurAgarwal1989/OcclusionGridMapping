@@ -1,6 +1,9 @@
 import os
 import sys, getopt
 import time
+
+import numpy as np
+
 from updateBelief import *
 from updateBelief import Cell
 from updateBelief import Observation
@@ -28,6 +31,7 @@ def usage():
 #function to generate state map from state probability
 def getStateMap(state_map, state_prob):
     state_map[state_prob > 0.5] = 255
+    #state_map[state_map == 0 and state_prob <= 0.5] = 0
     state_map[state_prob <= 0.5] = 0
     return state_map
 
@@ -36,9 +40,9 @@ def estimateState(fileName, idx, debug):
     WIDTH = 100
     T_STEPS = 20
     State_Map = np.zeros((HEIGHT, WIDTH), dtype = np.uint8);
-    State_Prob = np.full((HEIGHT, WIDTH), 1); #All cells are assumed empty initially
+    State_Prob = np.full((HEIGHT, WIDTH), 0.3); #All cells are assumed empty initially
     State_Map = getStateMap(State_Map, State_Prob)
-    saveImagePNG(State_Map, "init.png");
+    
     Cell_Grid = [[Cell() for w in range(WIDTH)] for h in range(HEIGHT)]
     
     #read and save ground truth form database
@@ -53,15 +57,17 @@ def estimateState(fileName, idx, debug):
     for t in range( 0, T_STEPS):
         for y in range( HEIGHT):
             for x in range( WIDTH):
-                obs = Laser_Scans [y, x, t]
+                obs = Laser_Scans[y, x, t]
                 Cell_Grid[y][x].setPrior(State_Prob[y][x])
-                if obs >0:
+                if obs > -1:
                     Cell_Grid[y][x].updateCellState(OBS_MAP[obs])
                     State_Prob[y][x] = Cell_Grid[y][x].getPrior()
+        #print State_Prob
                     
         State_Map = getStateMap(State_Map, State_Prob)
         saveImagePNG(State_Prob*255, 'prob_1'+str(t + idx)+'.png');
         saveImagePNG(State_Map, 'temp_est_map'+str(t + idx)+ '.png');
+        
         State_Map, State_Prob = predictState(State_Map, State_Prob)
         saveImagePNG(State_Prob*255, 'prob_2' +str(t + idx) +'.png');
     
