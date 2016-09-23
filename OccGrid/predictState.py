@@ -62,7 +62,7 @@ def predictState2(global_map, local_map, state_prob):
 def getNewCenter(l_x, l_y, g_x, g_y):
     newX = 0
     newY = 0
-    d = 6 - (np.sqrt((l_x-g_x)**2 + (l_y-g_y)**2))
+    d = - ((np.sqrt((l_x-g_x)**2 + (l_y-g_y)**2)) - 6)
     if (g_x == l_x and g_y == l_y):
         return (g_x, g_y)
     if (g_x == l_x):
@@ -86,9 +86,9 @@ def getNewCenter(l_x, l_y, g_x, g_y):
             newX = g_x - d
     else:
         theta = math.atan( (l_y - g_y) / (l_x - g_x) )
-        newX = g_x + d * math.cos(theta)
-        newY = g_y + d * math.sin(theta)
-        print l_x, l_y, g_x, g_y, newX, newY
+        newX = g_x - (d * math.cos(theta))
+        newY = g_y - (d * math.sin(theta))
+    print l_x, l_y, g_x, g_y, newX, newY
     return (newX, newY)
 
 def predictState(global_map, local_map, state_prob):
@@ -97,21 +97,29 @@ def predictState(global_map, local_map, state_prob):
     print "Predicting"
     #clean global map
     print "centroids"
-    print centroids_g
     print centroids_l
+    print centroids_g
     global_map = np.zeros_like(global_map)    
     
     #get distance matrix between all centroids
     dist = cdist(centroids_l, centroids_g, 'sqeuclidean')
     #find shortes distance between the local and global obstacle positions
     print c_l    
-    for p in range(1, c_l):        
-        if stats_l[p][4] > 2:  
-            print min(dist[p])
+    for p in range(1, c_l):      
+        if stats_l[p][4] > 2: 
+            print 'c_l_cen' , centroids_l[p][0], centroids_l[p][1]
+            print 'min_dist', min(dist[p])
+            best_g = np.argmin(dist[p])
+            print 'best_fit', best_g
             if min(dist[p]) < 15: # if newest center is lesser than 9 pixels 
                 # adjust center to 6 pixels in direction
                 best_g = np.argmin(dist[p])
-                (cx, cy) = getNewCenter(centroids_l[p][0], centroids_l[p][1], centroids_g[best_g][0], centroids_g[best_g][1])
+                print "getting new center", 
+                l_x = stats_l[p][0] + (stats_l[p][2]/2)
+                l_y = stats_l[p][1] + (stats_l[p][3]/2)
+                (cx, cy) = getNewCenter(l_x, l_y, centroids_g[best_g][0], centroids_g[best_g][1])
+             
+                #(cx, cy) = getNewCenter(centroids_l[p][0], centroids_l[p][1], centroids_g[best_g][0], centroids_g[best_g][1])
              
                 # add to global map
             else: # must be a new blob

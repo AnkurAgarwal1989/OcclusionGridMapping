@@ -38,7 +38,7 @@ def getStateMap(state_map, state_prob):
 def estimateState(fileName, idx, debug):
     HEIGHT = 100
     WIDTH = 100
-    T_STEPS = 10
+    T_STEPS = 20
     Global_State_Map = np.full((HEIGHT, WIDTH), 255, dtype = np.uint8);
     State_Prob = np.full((HEIGHT, WIDTH), 0.3); #All cells are assumed empty initially
     #State_Map = getStateMap(State_Map, State_Prob)
