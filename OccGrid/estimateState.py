@@ -22,10 +22,10 @@ State.OCC: 255}
 
 def usage():
     print "usage"
-    print "\t -h —help : prints this usage information"
-    print "\t -f —filename : REQUIRED. Path to H5PY file. If file exists in same location, only name is sufficient"
-    print "\t -i —index : REQUIRED. Index of frame to be estimated. Should be >= 20"
-    print "\t -d —debug: OPTIONAL. Flag to save estimated state map for each time step. default = False"
+    print "\t -h help : prints this usage information"
+    print "\t -f filename : REQUIRED. Path to H5PY file. If file exists in same location, only name is sufficient"
+    print "\t -i index : REQUIRED. Index of frame to be estimated. Should be >= 20"
+    print "\t -d debug: OPTIONAL. Flag to save estimated state map for each time step. default = False"
     return;
     
 #function to generate state map from state probability
@@ -53,7 +53,7 @@ def estimateState(fileName, idx, debug):
     
     #read laser scan data form database
     Laser_Scans = getData(fileName, 'occupancy', idx - T_STEPS + 1, T_STEPS);
-    
+    startTime = time.time();
     for t in range( 0, T_STEPS):
         State_Map = np.zeros((HEIGHT, WIDTH), dtype = np.uint8);
         State_Prob = np.full((HEIGHT, WIDTH), 0.3);
@@ -74,21 +74,24 @@ def estimateState(fileName, idx, debug):
         Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
         #saveImagePNG(State_Prob*255, str(t + idx) +'_prob_2.png');
         #saveImagePNG(Global_State_Map, str(t + idx)+'after_global_map.png');
-    
-        if debug:
+
+        '''if debug:
             saveImagePNG(Gnd_Truth[:, :, t], str(t + idx)+'_GT.png');
             #saveImagePNG(State_Map, 'est_map_'+str(t + idx)+'.png');
             compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, str(t + idx) + '_diff.png')
-            saveImagePNG(Laser_Scans[:, :, t], str(t + idx)+ '_scan.png');
-            
-    error = compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map)
-    print error
+            saveImagePNG(Laser_Scans[:, :, t], str(t + idx)+ '_scan.png');'''
+    print "Total time taken %s seconds" % ((time.time() - startTime));
+    diff_file_name = os.path.join(os.getcwd(), "diff.png") 
+    print "Difference image saved as "+ diff_file_name
+    print "Green areas are Ground Truth. Red is Estimate"
+    error = compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, diff_file_name)
+    print "Squared pixel value error: " + str(error)
     return error
 
 #Entry function
 def main(argv):
 
-    startTime = time.time();
+    
     fileName = None;
     idx = 0;
     saveDebugImages = False;
@@ -104,7 +107,7 @@ def main(argv):
         sys.exit(2);
         
     for opt, arg in opts:
-        if opt in ("-h", "-—help"):
+        if opt in ("-h", "help"):
             usage();
             sys.exit();
     
@@ -126,7 +129,6 @@ def main(argv):
         sys.exit();
     
     estimateState(fileName, idx, saveDebugImages)
-    print "Total time taken %s minutes" % ((time.time() - startTime)/60);
     
 if __name__ == "__main__":
     main(sys.argv[1:])

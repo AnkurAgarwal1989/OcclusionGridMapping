@@ -63,6 +63,7 @@ def getNewCenter(l_x, l_y, g_x, g_y):
     newX = 0
     newY = 0
     d = - ((np.sqrt((l_x-g_x)**2 + (l_y-g_y)**2)) - OBSTACLE_RADIUS)
+    
     if (g_x == l_x and g_y == l_y):
         return (g_x, g_y)
     if (g_x == l_x):
