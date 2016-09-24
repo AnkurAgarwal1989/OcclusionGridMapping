@@ -14,11 +14,8 @@ def compareWithGroundTruth(state_GT, state_est, filename = "diff_image.png"):
   diff_image[state_GT < state_est] = (0, 0, 255)
   saveImagePNG(diff_image, filename);
   #cv2.imwrite(filename, diff_image, cv2.CV_IMWRITE_PNG_COMPRESSION, 0)
-  error = np.ones((state_GT.shape[0], state_GT.shape[1]));
-  error[state_GT == state_est] = 0
-  return np.sum(np.sum(error))
   error = np.linalg.norm(diff_image)
-  #error = error ** 2;
+  error = error ** 2;
   return error
 
 

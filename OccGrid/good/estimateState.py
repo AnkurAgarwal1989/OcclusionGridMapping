@@ -39,10 +39,9 @@ def estimateState(fileName, idx, debug):
     HEIGHT = 100
     WIDTH = 100
     T_STEPS = 20
-    State_Map = np.full((HEIGHT, WIDTH), 0, dtype = np.uint8);
-    Global_State_Map = np.zeros_like(State_Map)
+    Global_State_Map = np.full((HEIGHT, WIDTH), 255, dtype = np.uint8);
     State_Prob = np.full((HEIGHT, WIDTH), 0.3); #All cells are assumed empty initially
-    State_Map = getStateMap(State_Map, State_Prob)
+    #State_Map = getStateMap(State_Map, State_Prob)
     
     Cell_Grid = [[Cell() for w in range(WIDTH)] for h in range(HEIGHT)]
     
@@ -50,37 +49,32 @@ def estimateState(fileName, idx, debug):
     
     #Gnd_Truth = getData(fileName, 'ground_truth', idx);
     #savelmagePNG(Gnd_Truth[:, :, 0], 'GT_' + str(idx) + '.png');
-    begin_idx = idx - T_STEPS + 1
-    Gnd_Truth = getData(fileName, 'ground_truth', begin_idx, T_STEPS);
+    Gnd_Truth = getData(fileName, 'ground_truth', idx - T_STEPS + 1, T_STEPS);
     
     #read laser scan data form database
-    Laser_Scans = getData(fileName, 'occupancy', begin_idx, T_STEPS);
+    Laser_Scans = getData(fileName, 'occupancy', idx - T_STEPS + 1, T_STEPS);
     startTime = time.time();
     for t in range( 0, T_STEPS):
         State_Map = np.zeros((HEIGHT, WIDTH), dtype = np.uint8);
-        #saveImagePNG(State_Prob*255, str(begin_idx + t)+'_init_prob.png');
-        #State_Prob = np.full((HEIGHT, WIDTH), 0.3);
+        State_Prob = np.full((HEIGHT, WIDTH), 0.3);
         for y in range( HEIGHT):
             for x in range( WIDTH):
                 obs = Laser_Scans[y, x, t]
                 Cell_Grid[y][x].setPrior(State_Prob[y][x])
-                if obs > 0:
+                if obs > -1:
                     Cell_Grid[y][x].updateCellState(OBS_MAP[obs])
                     State_Prob[y][x] = Cell_Grid[y][x].getPrior()
+        #print State_Prob
                     
         State_Map = getStateMap(State_Map, State_Prob)
-        saveImagePNG(Laser_Scans[:, :, t], str(begin_idx + t)+ '_scan.png');
-        saveImagePNG(State_Prob*255, str(begin_idx + t)+'_prob_1.png');
-        saveImagePNG(State_Map, str(begin_idx + t)+ '_local_map.png');
+        #saveImagePNG(State_Prob*255, str(t + idx)+'_prob_1.png');
+        #saveImagePNG(State_Map, str(t + idx)+ 'local_map.png');
         
         #saveImagePNG(Global_State_Map, str(t + idx)+'before_global_map.png');
-        
-        #Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
         Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
-        saveImagePNG(State_Prob*255, str(begin_idx + t) +'_prob_2.png');
-        saveImagePNG(Global_State_Map, str(begin_idx + t)+'_after_global_map.png');
-        error = compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, 'ttt ' + str(begin_idx + t) + '.png')
-        print "Squared pixel value error: " + str(error)
+        #saveImagePNG(State_Prob*255, str(t + idx) +'_prob_2.png');
+        #saveImagePNG(Global_State_Map, str(t + idx)+'after_global_map.png');
+
         '''if debug:
             saveImagePNG(Gnd_Truth[:, :, t], str(t + idx)+'_GT.png');
             #saveImagePNG(State_Map, 'est_map_'+str(t + idx)+'.png');

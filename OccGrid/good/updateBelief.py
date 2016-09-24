@@ -39,8 +39,7 @@ class Cell:
     p_occ = {}
     p_occ[Observation.HIT] = 0.9999
     p_occ[Observation.MISS] = 0.0001
-    p_occ[Observation.NO_OBS]  = 0.01
-    
+    p_occ[Observation.NO_OBS]  = 0.5
     
     #variable to hold log_odds
     log_odds = 0;
@@ -48,14 +47,14 @@ class Cell:
     def __init__(self):
         #initialize a cell with a high probability of being empty
         self.state_curr = State.EMPTY
-        self.prior[0,0] = 0.7   #occlusion
-        self.prior[0,1] = 0.3   #empty
+        self.prior[0,0] = 0.3   #occlusion
+        self.prior[0,1] = 0.7   #empty
         
         #Dynamic Environment
-        self.A[0, 0] = 0.8
-        self.A[0, 1] = 0.2
-        self.A[1, 0] = 0.1
-        self.A[1, 1] = 0.9
+        self.A[0, 0] = 0.7
+        self.A[0, 1] = 0.3
+        self.A[1, 0] = 0.3
+        self.A[1, 1] = 0.7
         
         '''self.A[0, 0] = 1
         self.A[0, 1] = 0
@@ -72,10 +71,9 @@ class Cell:
  
     #function to update state probabilities (prior) of the cell with observation z of laser scan.
     def updateCellState(self, z):
-        
         prior_trans = self.prior.dot(self.A)
         prior_trans = normalize_1d(prior_trans)
-        self.log_odds = np.log(self.p_occ[z]) - np.log(1 - self.p_occ[z]) + np.log(1 - prior_trans[0, 0]) - np.log(prior_trans[0, 0])
+        self.log_odds += np.log(self.p_occ[z]) - np.log(1 - self.p_occ[z]) + np.log(1 - prior_trans[0, 0]) - np.log(prior_trans[0, 0])
         self.posterior[0, 0] = 1 - (1 / (1 + np.exp(self.log_odds)))
         self.posterior[0, 1] = 1 - self.posterior[0, 0]
         
