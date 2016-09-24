@@ -98,7 +98,8 @@ def predictState(global_map, local_map, state_prob):
                 # adjust center to 6 pixels in direction
                 best_g = np.argmin(dist[p])
                 tracked.append(best_g)
-                #print "getting new center", 
+                
+                #Find center of bounding box for the local map obstacle.
                 l_x = stats_l[p][0] + (stats_l[p][2]/2)
                 l_y = stats_l[p][1] + (stats_l[p][3]/2)
                 #(cx, cy) = getNewCenter(l_x, l_y, centroids_g[best_g][0], centroids_g[best_g][1])

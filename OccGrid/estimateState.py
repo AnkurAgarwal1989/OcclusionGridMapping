@@ -35,7 +35,7 @@ def getStateMap(state_map, state_prob):
     state_map[state_prob <= 0.5] = 0
     return state_map
 
-def estimateState(fileName, idx, debug):
+def estimateState(fileName, idx, DEBUG):
     HEIGHT = 100
     WIDTH = 100
     T_STEPS = 20
@@ -46,20 +46,14 @@ def estimateState(fileName, idx, debug):
     
     Cell_Grid = [[Cell() for w in range(WIDTH)] for h in range(HEIGHT)]
     
-    #read and save ground truth form database
-    
-    #Gnd_Truth = getData(fileName, 'ground_truth', idx);
-    #savelmagePNG(Gnd_Truth[:, :, 0], 'GT_' + str(idx) + '.png');
     begin_idx = idx - T_STEPS + 1
-    Gnd_Truth = getData(fileName, 'ground_truth', begin_idx, T_STEPS);
-    
-    #read laser scan data form database
-    Laser_Scans = getData(fileName, 'occupancy', begin_idx, T_STEPS);
+    goodData, Gnd_Truth, Laser_Scans = getData(fileName, begin_idx, T_STEPS);
+    if not goodData:
+        print "Error reading Data"
+        return -1
+        
     startTime = time.time();
     for t in range( 0, T_STEPS):
-        State_Map = np.zeros((HEIGHT, WIDTH), dtype = np.uint8);
-        #saveImagePNG(State_Prob*255, str(begin_idx + t)+'_init_prob.png');
-        #State_Prob = np.full((HEIGHT, WIDTH), 0.3);
         for y in range( HEIGHT):
             for x in range( WIDTH):
                 obs = Laser_Scans[y, x, t]
@@ -70,25 +64,20 @@ def estimateState(fileName, idx, debug):
                     
         State_Map = getStateMap(State_Map, State_Prob)
         
-        if debug:
+        if DEBUG:
             saveImagePNG(Laser_Scans[:, :, t], str(begin_idx + t)+ '_scan.png');
-            saveImagePNG(State_Prob*255, str(begin_idx + t)+'_prob_1.png');
+            saveImagePNG(State_Prob*255, str(begin_idx + t)+'_prob_A.png');
             saveImagePNG(State_Map, str(begin_idx + t)+ '_local_map.png');
-            #saveImagePNG(Global_State_Map, str(t + idx)+'before_global_map.png');
         
-        #Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
         Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
         
-        
-        if debug:
-            saveImagePNG(State_Prob*255, str(begin_idx + t) +'_prob_2.png');
-            saveImagePNG(Global_State_Map, str(begin_idx + t)+'_after_global_map.png');
-            saveImagePNG(Gnd_Truth[:, :, t], str(t + idx)+'_GT.png');
-            #saveImagePNG(State_Map, 'est_map_'+str(t + idx)+'.png');
-            compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, str(t + idx) + '_diff.png')
-            saveImagePNG(Laser_Scans[:, :, t], str(t + idx)+ '_scan.png');
+        if DEBUG:
+            saveImagePNG(State_Prob*255, str(begin_idx + t) +'_prob_B.png');
+            saveImagePNG(Global_State_Map, str(begin_idx + t)+'_corrected_map.png');
+            saveImagePNG(Gnd_Truth[:, :, t], str(begin_idx + t)+'_GT.png');
+            compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, str(begin_idx + t) + '_diff.png')
     
-    print "Total time taken %s seconds" % ((time.time() - startTime));
+    print "Time taken %s seconds" % ((time.time() - startTime));
     diff_file_name = os.path.join(os.getcwd(), "diff.png") 
     print "Difference image saved as "+ diff_file_name
     print "Green areas are Ground Truth. Red is Estimate"
