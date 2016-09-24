@@ -54,7 +54,7 @@ def estimateState(fileName, idx, DEBUG):
         
     startTime = time.time();
     for t in range( 0, T_STEPS):
-        saveImagePNG(State_Prob*255, str(begin_idx + t) +'_prob_B_before.png');
+        saveImagePNG(State_Prob * 255, str(begin_idx + t) +'_prob_B_before.png');
         for y in range( HEIGHT):
             for x in range( WIDTH):
                 obs = Laser_Scans[y, x, t]
