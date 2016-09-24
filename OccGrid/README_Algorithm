@@ -1,0 +1,55 @@
+Approach:
+I browsed through some papers (more details further below) talking about Occupancy Grid Mapping, but those were either very focussed on static environments or majorly static (like a room, with a small number of moving things). The probability update parts were derived from [1] and [2]. The later parts are my own and I have not taken any information form external sources. I wanted to use the model of the obstacle (circle of radius 6) to estimate the state. Connected components seemed like a good way to add information to the state.
+
+Initially, all pixels are considered empty. State is 0 and probability of occlusion (Pocc) is 0.3.
+We maintain a Global State Map and a State Probability Map. At each time step, we receive scan data, update probabilities, create a local state map and correct the global state map.
+
+1. For every pixel a bayesian probability update is done while considering the "dynamic" nature of the state. A state transition matrix, A is used to transform the prior at step. The probability of occlusion is the  calculated using log-odds and an inverse sensor model.
+2. Create a state map (0 or 255) from the Pocc. We can take advantage of the fact that cells connected to each other belong to the same obstacle (except in case of collision).
+3. A connected component analysis is done on this local state map and the global state map.
+4. we find the closest global map obstacle for each obstacle in the local map. For each matched component greater in area than a certain threshold, an obstacle of radius 6 pixels is added to the Global Map. Since the global map is 1 time step behind the local map, the center is moved such that it lies between the two matched obstacles, weighted towards the local map.
+5. The probabilities also need to be updated to account for the circular obstacle. Probabilities in a circular area around the new obstacle center are increased by a factor (0.9 or any high value < 1); other values in the component are reduced by a small factor. This adds a sense of circularity in the very sparse laser scan data.
+6. This process is repeated for T time steps.
+
+Advantages and disadvantages:
+1. Since the probability update is independent for each cell, this part can be made parallel.
+2. Allows for using noisy sensor data and sensor models.
+3. We can keep integrating over N time steps. Essentially, for a real time operation, we only need to process one additional frame per time step.
+4. We need to perform 2 connected component labellings at each time step. This might make it slow for larger grids.
+5. The expected error metric is a bit disappointing. The algorithm does not do well with "hidden" obstacles or obstacles that get hidden over time.
+
+Relevant materials:
+1. http://robots.stanford.edu/papers/thrun.occ-journal.pdf
+2. https://www.researchgate.net/publication/5596903_Online_Learning_with_Hidden_Markov_Models
+3. http://www.cs.cmu.edu/~16831-f12/notes/F12/16831_lecture05_vh.pdf
+
+Time Breakdown:
+Total Time: ~14 hours
+1. Initial data probing: About 1 hour
+2. Finding and reading papers: About 5 hours; split over 2 days. I learnt a lot but this was not a fruitful effort :)
+3. Algorithm dev and pseudo code: About 2 hours
+4. Code development: About 4 hours; split over 2 days.
+5. Cleanup and writeup: 2 hours
+
+Future directions:
+-- What would you do with a few days? with a few weeks?
+	1. I would like to implement a better way to calculate the State Transition Matrix. Currently I am using some heuristic values that are same for all cells.
+		I read some papers which did that to separate walls or other fixed obstacles from moving ones. Some more exploring required there.
+	2. Implement a tracking module. I would like to be able to estimate dx and dy to predict the future state. I am already doing one part of the tracking.
+	3. I would also like to find a better way to correct the state in my current solution.
+		Intersection of odstacle (circle) and line joining 2 centroids could possibly be used instead of the weighted average I am using.
+
+-- What if your algorithm needed to run in real time (20hz)?
+	1. This is a python implementation so C++ would definitely speed things up.
+	2. Also, on my machine this takes about 4 seconds to work over 20 frames. Since we only need to incrementally update, the processing time can be 200ms.
+		This is about 5 Hz (in Python)
+	3. Also, the probability update can be made parallel.
+
+-- Our simulated sensor data is very clean, how would you deal with noisy real world sensor data.
+	1. The inverse sensor model can be easily changed to account for noisy data.
+	
+Inferring future states:
+1. The algorithm in its current state CAN infer future states but only to a certain extent and with a small accuracy.
+2. It essentially uses the State Transition Matrix to calculate the probability of the state being the same in case of an "UNKNOWN" or "NO OBSERVATION".
+3. A filter (kalman or even a decaying average filter) should be able to do some future state prediction.
+

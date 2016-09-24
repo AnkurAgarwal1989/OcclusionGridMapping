@@ -1,0 +1,18 @@
+- Set up and Execution
+  Code written with Python 2.7 (Anaconda distribution)
+  Required packages/ modules
+    - numpy
+	- scipy
+    - h5py
+    - OpenCV 3 for Python (connected component with statistics)
+  Setup:
+    - estimateState is the entry point.
+    - All files need to be in the same folder.
+    
+  Execution:
+    - CLI
+      - estimateState -h , prints help
+	  - -d enables saving debug images. This saves about 5 images per frame.
+      - Sample execution: Use 'data.h5' file to estimate state at 40th location.
+			estimateState -f 'data.h5' -i 40
+		

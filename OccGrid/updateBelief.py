@@ -51,16 +51,14 @@ class Cell:
         self.prior[0,0] = 0.7   #occlusion
         self.prior[0,1] = 0.3   #empty
         
-        #Dynamic Environment
+        #Dynamic Environment (Heuristic)
+        #A = [P(occ | occ)   P(occ | empty)
+        #     P(empty | occ)   P(empty | empty)]
         self.A[0, 0] = 0.7
         self.A[0, 1] = 0.3
         self.A[1, 0] = 0.2
         self.A[1, 1] = 0.8
         
-        '''self.A[0, 0] = 1
-        self.A[0, 1] = 0
-        self.A[1, 0] = 0
-        self.A[1, 1] = 1'''
     #set cell prior to occlusion probability after state map correction
     def setPrior(self, p_occ):
         self.prior[0, 0] = p_occ
@@ -79,26 +77,10 @@ class Cell:
         self.posterior[0, 0] = 1 - (1 / (1 + np.exp(self.log_odds)))
         self.posterior[0, 1] = 1 - self.posterior[0, 0]
         
-        #some counting maybe???
-        
         self.prior = self.posterior.copy()
-        '''if z == Observation.HIT:
-            self.prior[0, 0] = 0.8
-            self.prior[0, 1] = 1 - 0.8
-        
-        elif z == Observation.MISS:
-            self.prior[0, 0] = 0.2
-            self.prior[0, 1] = 1 - 0.2
-        elif z == Observation.NO_OBS:
-            print "WTF"'''
     
     def printStateMatrix(self):
         print self.Q_curr;    
     
-    '''def getState(self):
-        if (self.prior[0, 0] > 0.5):
-            return State.OCC
-        return State.EMPTY'''
-        
     def __repr__(self):
         return self.getState()

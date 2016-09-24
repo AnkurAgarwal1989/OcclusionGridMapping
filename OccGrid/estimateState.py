@@ -54,11 +54,12 @@ def estimateState(fileName, idx, DEBUG):
         
     startTime = time.time();
     for t in range( 0, T_STEPS):
+        saveImagePNG(State_Prob*255, str(begin_idx + t) +'_prob_B_before.png');
         for y in range( HEIGHT):
             for x in range( WIDTH):
                 obs = Laser_Scans[y, x, t]
                 Cell_Grid[y][x].setPrior(State_Prob[y][x])
-                if obs > -1:
+                if obs > 0:
                     Cell_Grid[y][x].updateCellState(OBS_MAP[obs])
                     State_Prob[y][x] = Cell_Grid[y][x].getPrior()
                     
