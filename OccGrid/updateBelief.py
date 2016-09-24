@@ -39,7 +39,7 @@ class Cell:
     p_occ = {}
     p_occ[Observation.HIT] = 0.9999
     p_occ[Observation.MISS] = 0.0001
-    p_occ[Observation.NO_OBS]  = 0.01
+    p_occ[Observation.NO_OBS]  = 0.15
     
     
     #variable to hold log_odds
@@ -52,10 +52,10 @@ class Cell:
         self.prior[0,1] = 0.3   #empty
         
         #Dynamic Environment
-        self.A[0, 0] = 0.8
-        self.A[0, 1] = 0.2
-        self.A[1, 0] = 0.1
-        self.A[1, 1] = 0.9
+        self.A[0, 0] = 0.7
+        self.A[0, 1] = 0.3
+        self.A[1, 0] = 0.2
+        self.A[1, 1] = 0.8
         
         '''self.A[0, 0] = 1
         self.A[0, 1] = 0

@@ -64,28 +64,30 @@ def estimateState(fileName, idx, debug):
             for x in range( WIDTH):
                 obs = Laser_Scans[y, x, t]
                 Cell_Grid[y][x].setPrior(State_Prob[y][x])
-                if obs > 0:
+                if obs > -1:
                     Cell_Grid[y][x].updateCellState(OBS_MAP[obs])
                     State_Prob[y][x] = Cell_Grid[y][x].getPrior()
                     
         State_Map = getStateMap(State_Map, State_Prob)
-        saveImagePNG(Laser_Scans[:, :, t], str(begin_idx + t)+ '_scan.png');
-        saveImagePNG(State_Prob*255, str(begin_idx + t)+'_prob_1.png');
-        saveImagePNG(State_Map, str(begin_idx + t)+ '_local_map.png');
         
-        #saveImagePNG(Global_State_Map, str(t + idx)+'before_global_map.png');
+        if debug:
+            saveImagePNG(Laser_Scans[:, :, t], str(begin_idx + t)+ '_scan.png');
+            saveImagePNG(State_Prob*255, str(begin_idx + t)+'_prob_1.png');
+            saveImagePNG(State_Map, str(begin_idx + t)+ '_local_map.png');
+            #saveImagePNG(Global_State_Map, str(t + idx)+'before_global_map.png');
         
         #Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
         Global_State_Map, State_Prob = predictState(Global_State_Map, State_Map, State_Prob)
-        saveImagePNG(State_Prob*255, str(begin_idx + t) +'_prob_2.png');
-        saveImagePNG(Global_State_Map, str(begin_idx + t)+'_after_global_map.png');
-        error = compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, 'ttt ' + str(begin_idx + t) + '.png')
-        print "Squared pixel value error: " + str(error)
-        '''if debug:
+        
+        
+        if debug:
+            saveImagePNG(State_Prob*255, str(begin_idx + t) +'_prob_2.png');
+            saveImagePNG(Global_State_Map, str(begin_idx + t)+'_after_global_map.png');
             saveImagePNG(Gnd_Truth[:, :, t], str(t + idx)+'_GT.png');
             #saveImagePNG(State_Map, 'est_map_'+str(t + idx)+'.png');
             compareWithGroundTruth(Gnd_Truth[:, :, t], Global_State_Map, str(t + idx) + '_diff.png')
-            saveImagePNG(Laser_Scans[:, :, t], str(t + idx)+ '_scan.png');'''
+            saveImagePNG(Laser_Scans[:, :, t], str(t + idx)+ '_scan.png');
+    
     print "Total time taken %s seconds" % ((time.time() - startTime));
     diff_file_name = os.path.join(os.getcwd(), "diff.png") 
     print "Difference image saved as "+ diff_file_name

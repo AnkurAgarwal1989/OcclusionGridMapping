@@ -87,21 +87,23 @@ def predictState(global_map, local_map, state_prob):
     #get distance matrix between all centroids
     dist = cdist(centroids_l, centroids_g, 'sqeuclidean')
     #find shortes distance between the local and global obstacle positions 
+    tracked = []
     for p in range(1, c_l):      
         if stats_l[p][4] > 3: 
             #print 'c_l_cen' , centroids_l[p][0], centroids_l[p][1]
             #print 'min_dist', min(dist[p])
             best_g = np.argmin(dist[p])
             #print 'best_fit', best_g
-            if min(dist[p]) < 20 and best_g > 0: # if newest center is lesser than 9 pixels 
+            if min(dist[p]) < 25 and best_g > 0: # if newest center is lesser than 9 pixels 
                 # adjust center to 6 pixels in direction
                 best_g = np.argmin(dist[p])
+                tracked.append(best_g)
                 #print "getting new center", 
                 l_x = stats_l[p][0] + (stats_l[p][2]/2)
                 l_y = stats_l[p][1] + (stats_l[p][3]/2)
                 #(cx, cy) = getNewCenter(l_x, l_y, centroids_g[best_g][0], centroids_g[best_g][1])
-                cx = (centroids_l[p][0]*2 + centroids_g[best_g][0])/3
-                cy = (centroids_l[p][1]*2 + centroids_g[best_g][1])/3
+                cx = (l_x*2  + centroids_g[best_g][0])/3
+                cy = (l_y*2  + centroids_g[best_g][1])/3
                 
                 #cx = centroids_l[p][0]
                 #cy = centroids_l[p][1]
@@ -111,19 +113,22 @@ def predictState(global_map, local_map, state_prob):
                 # add to global map
             else: # must be a new blob
                 (cx, cy) = (centroids_l[p][0], centroids_l[p][1])
-                
+            #state_prob[labels_l == p] = 0.3 #cut off all other spurious values
             global_map = drawObstacle(global_map, (cx, cy), OBSTACLE_RADIUS, 255)
-            state_prob = drawObstacle(state_prob, (cx, cy), OBSTACLE_RADIUS , 0.7)
+            state_prob = drawObstacle(state_prob, (cx, cy), OBSTACLE_RADIUS , 0.8)
+            state_prob[labels_l == p] = state_prob[labels_l == p] * 0.9
         else:
             #global_map[labels_l == p] = 255
-            state_prob[labels_l == p] = 0.7
+            #state_prob[labels_l == p] = 0.7
+            state_prob[labels_l == p] = state_prob[labels_l == p] * 0.9
     
     #there are obstacles in global map that also need to be added
     '''for p in range(1, c_g):
-        if min(dist[:, p]) > 20 and min(dist[:, p]) < 40: #this obstacles was probably not added by anyone
+        if p not in tracked:
             (cx, cy) = (centroids_g[p][0], centroids_g[p][1])
-            #global_map = drawObstacle(global_map, (cx, cy), OBSTACLE_RADIUS, 255)
-            state_prob = drawObstacle(state_prob, (cx, cy), OBSTACLE_RADIUS, 0.7)'''
+            global_map = drawObstacle(global_map, (cx, cy), OBSTACLE_RADIUS, 255)
+        #state_prob = drawObstacle(state_prob, (cx, cy), OBSTACLE_RADIUS, 0.7)
+        #state_prob[labels_l == p] = 0.7'''
         
         
     return (global_map, state_prob)
